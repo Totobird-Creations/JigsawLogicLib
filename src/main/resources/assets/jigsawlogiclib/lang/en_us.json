@@ -1,0 +1,12 @@
+{
+  "block.jigsawlogiclib.logic"     : "Structure Logic Block",
+  "screen.jigsawlogiclib.title"    : "Structure Game Logic",
+  "screen.jigsawlogiclib.command"  : "Command:",
+  "screen.jigsawlogiclib.metadata" : "Metadata:",
+  "screen.jigsawlogiclib.run"      : "Run",
+
+  "feedback.jigsawlogiclib.set.success"        : "Set command: `%1$s`",
+  "feedback.jigsawlogiclib.run.success"        : "Command `%1$s` succeeded.",
+  "feedback.jigsawlogiclib.run.failed.missing" : "Command `%1$s` does not exist.",
+  "feedback.jigsawlogiclib.run.failed.crash"   : "Command `%1$s` failed. Check console for details."
+}
