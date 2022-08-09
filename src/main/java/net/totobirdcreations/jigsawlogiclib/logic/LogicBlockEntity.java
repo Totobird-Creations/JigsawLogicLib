@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -27,6 +28,7 @@ public class LogicBlockEntity extends BlockEntity implements ExtendedScreenHandl
             new Identifier(""),
             ""
     );
+    public boolean canRun = false;
 
 
     public LogicBlockEntity(BlockPos pos, BlockState state) {
@@ -45,12 +47,21 @@ public class LogicBlockEntity extends BlockEntity implements ExtendedScreenHandl
     public void readNbt(NbtCompound nbt) {
         this.data.command = new Identifier(nbt.getString("command"));
         this.data.metadata = nbt.getString("metadata");
+        this.canRun = nbt.getBoolean("canRun");
     }
 
     @Override
     public void writeNbt(NbtCompound nbt) {
         nbt.putString("command", this.data.command.toString());
         nbt.putString("metadata", this.data.metadata);
+        nbt.putBoolean("canRun", this.canRun);
+    }
+
+
+    public void tick() {
+        if (this.world != null && this.canRun) {
+            this.run(this.world, null);
+        }
     }
 
 
@@ -65,21 +76,24 @@ public class LogicBlockEntity extends BlockEntity implements ExtendedScreenHandl
     }
 
 
-    public void run(@Nullable ServerPlayerEntity player) {
+    public void run(@Nullable World world, @Nullable ServerPlayerEntity player) {
         Identifier command = this.data.command;
         String metadata = this.data.metadata;
-        World world = this.world;
-        BlockPos pos = this.pos;
+        world = world != null ? world : this.world;
+        BlockPos blockPos = this.pos;
         if (world != null) {
-            BlockState savedState = world.getBlockState(pos);
+            BlockState savedState = world.getBlockState(blockPos);
             LogicBlockEntity.Data savedData = this.data;
-            world.removeBlockEntity(pos);
-            world.setBlockState(pos, Blocks.AIR.getDefaultState());
-            LogicCommandManager.Response response = LogicCommandManager.run(command, metadata, world, pos);
+            world.removeBlockEntity(blockPos);
+            world.removeBlock(blockPos, false);
+            LogicCommandManager.Response response = LogicCommandManager.run(
+                    command, metadata, world, blockPos
+            );
+            world.markDirty(blockPos);
             response.sendToPlayer(player, command);
             if (player != null && response != LogicCommandManager.Response.SUCCESS) {
-                world.setBlockState(pos, savedState);
-                if (world.getBlockEntity(pos) instanceof LogicBlockEntity entity) {
+                world.setBlockState(blockPos, savedState);
+                if (world.getBlockEntity(blockPos) instanceof LogicBlockEntity entity) {
                     entity.data = savedData;
                 }
             }

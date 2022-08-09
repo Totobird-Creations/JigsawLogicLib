@@ -5,6 +5,9 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.OperatorBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -38,6 +41,13 @@ public class LogicBlock extends BlockWithEntity implements OperatorBlock {
 
     @Override
     public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks) {}
+
+
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World ignoredWorld, BlockState ignoredState, BlockEntityType<T> ignoredType) {
+        return ((world, pos, state, entity) -> {
+            if (entity instanceof LogicBlockEntity logicEntity) {logicEntity.tick();}
+        });
+    }
 
 
     @SuppressWarnings("deprecation")

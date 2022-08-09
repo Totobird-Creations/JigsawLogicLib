@@ -14,11 +14,11 @@ public class Example {
     public static void enable() {
         LogicCommandManager.register(
                 new Identifier("logic_example", "put_sign"),
-                (metadata, world, pos) -> {
+                (metadata, world, blockPos) -> {
 
-                    world.setBlockState(pos, Blocks.DIAMOND_BLOCK.getDefaultState());
+                    world.setBlockState(blockPos, Blocks.DIAMOND_BLOCK.getDefaultState());
 
-                    BlockPos signPos = pos.up(1);
+                    BlockPos signPos = blockPos.up(1);
                     world.setBlockState(signPos, Blocks.WARPED_SIGN.getDefaultState()
                             .with(Properties.ROTATION, world.getRandom().nextInt(16))
                     );
