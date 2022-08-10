@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class StructureTemplateMixin {
 
 
-    private StructurePlacementData data;
+    private BlockPos structureOrigin;
 
 
     @Inject(
@@ -31,7 +31,7 @@ public abstract class StructureTemplateMixin {
             )
     )
     void readNbtInject(ServerWorldAccess world, BlockPos pos, BlockPos pivot, StructurePlacementData data, Random random, int flags, CallbackInfoReturnable<Boolean> callback) {
-        this.data = data;
+        this.structureOrigin = pos;
     }
 
 
@@ -44,9 +44,10 @@ public abstract class StructureTemplateMixin {
     )
     void readNbtRedirect(BlockEntity entity, NbtCompound nbt) {
         if (entity instanceof LogicBlockEntity) {
-            BlockPos pos = data.getPosition();
             nbt.putIntArray("structureOrigin", new int[] {
-                    pos.getX(), pos.getY(), pos.getZ()
+                    structureOrigin.getX(),
+                    structureOrigin.getY(),
+                    structureOrigin.getZ()
             });
         }
         entity.readNbt(nbt);
