@@ -8,6 +8,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,7 +29,7 @@ public class LogicBlockEntity extends BlockEntity implements ExtendedScreenHandl
             new Identifier(""),
             ""
     );
-    public boolean canRun = false;
+    public BlockPos structureOrigin = null;
 
 
     public LogicBlockEntity(BlockPos pos, BlockState state) {
@@ -47,20 +48,29 @@ public class LogicBlockEntity extends BlockEntity implements ExtendedScreenHandl
     public void readNbt(NbtCompound nbt) {
         this.data.command = new Identifier(nbt.getString("command"));
         this.data.metadata = nbt.getString("metadata");
-        this.canRun = nbt.getBoolean("canRun");
+        if (nbt.contains("structureOrigin", NbtElement.INT_ARRAY_TYPE)) {
+            int[] ints = nbt.getIntArray("structureOrigin");
+            this.structureOrigin = new BlockPos(ints[0], ints[1], ints[2]);
+        }
     }
 
     @Override
     public void writeNbt(NbtCompound nbt) {
         nbt.putString("command", this.data.command.toString());
         nbt.putString("metadata", this.data.metadata);
-        nbt.putBoolean("canRun", this.canRun);
+        if (structureOrigin != null) {
+            nbt.putIntArray("structureOrigin", new int[]{
+                    structureOrigin.getX(),
+                    structureOrigin.getY(),
+                    structureOrigin.getZ()
+            });
+        }
     }
 
 
     public void tick() {
-        if (this.world != null && this.canRun) {
-            this.run(this.world, null);
+        if (this.structureOrigin != null && this.world != null) {
+            this.run(this.world, this.structureOrigin, null);
         }
     }
 
@@ -76,7 +86,7 @@ public class LogicBlockEntity extends BlockEntity implements ExtendedScreenHandl
     }
 
 
-    public void run(@Nullable World world, @Nullable ServerPlayerEntity player) {
+    public void run(@Nullable World world, BlockPos structureOrigin, @Nullable ServerPlayerEntity player) {
         Identifier command = this.data.command;
         String metadata = this.data.metadata;
         world = world != null ? world : this.world;
@@ -84,10 +94,9 @@ public class LogicBlockEntity extends BlockEntity implements ExtendedScreenHandl
         if (world != null) {
             BlockState savedState = world.getBlockState(blockPos);
             LogicBlockEntity.Data savedData = this.data;
-            world.removeBlockEntity(blockPos);
             world.removeBlock(blockPos, false);
             LogicCommandManager.Response response = LogicCommandManager.run(
-                    command, metadata, world, blockPos
+                    command, metadata, world, blockPos, structureOrigin
             );
             world.markDirty(blockPos);
             response.sendToPlayer(player, command);

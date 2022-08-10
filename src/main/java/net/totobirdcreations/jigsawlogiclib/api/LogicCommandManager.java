@@ -50,14 +50,14 @@ public class LogicCommandManager {
     }
 
 
-    public static Response run(Identifier command, String metadata, World world, BlockPos blockPos) {
+    public static Response run(Identifier command, String metadata, World world, BlockPos blockPos, BlockPos structureOrigin) {
         if (commands.containsKey(command)) {
             ArrayList<RunCommandCallback> callbacks = commands.get(command);
             if (callbacks.size() > 0) {
                 Response response = Response.SUCCESS;
                 for (RunCommandCallback callback : callbacks) {
                     try {
-                        callback.run(metadata, world, blockPos);
+                        callback.run(metadata, world, blockPos, structureOrigin);
                     } catch (Exception e) {
                         Main.LOGGER.error("Jigsaw logic handler registered for `" + command.toString() + "` failed.");
                         e.printStackTrace();
@@ -73,7 +73,7 @@ public class LogicCommandManager {
 
 
     public interface RunCommandCallback {
-        void run(String metadata, World world, BlockPos blockPos) throws Exception;
+        void run(String metadata, World world, BlockPos blockPos, BlockPos structureOrigin) throws Exception;
     }
 
 }

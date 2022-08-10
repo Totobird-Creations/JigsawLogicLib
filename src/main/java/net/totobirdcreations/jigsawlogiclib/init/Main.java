@@ -110,7 +110,7 @@ public class Main implements ModInitializer {
 				entity.data.metadata = metadata;
 				entity.markDirty();
 				if (run) {
-					entity.run(null, player);
+					entity.run(null, pos, player);
 				} else {
 					player.sendMessage(Text.translatable(Lang.SET_SUCCESS, command));
 				}
@@ -123,7 +123,7 @@ public class Main implements ModInitializer {
 	public void onInitialize() {
 		LogicCommandManager.register(
 				new Identifier("empty"),
-				(metadata, world, blockPos) -> {}
+				(metadata, world, blockPos, structureOrigin) -> {}
 		);
 
 		if (FabricLoader.getInstance().isDevelopmentEnvironment()) {

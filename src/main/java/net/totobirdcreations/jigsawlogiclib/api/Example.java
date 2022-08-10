@@ -14,7 +14,7 @@ public class Example {
     public static void enable() {
         LogicCommandManager.register(
                 new Identifier("logic_example", "put_sign"),
-                (metadata, world, blockPos) -> {
+                (metadata, world, blockPos, structureOrigin) -> {
 
                     world.setBlockState(blockPos, Blocks.DIAMOND_BLOCK.getDefaultState());
 
